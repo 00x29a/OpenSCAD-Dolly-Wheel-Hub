@@ -16,12 +16,11 @@ module toroid(outer_radius, tube_radius) {
 }
  // Function to create a single spoke                                                                                                                                                                                             
  module spoke() {                                                                                                                                                                                                                 
-     cube([spoke_thickness, outer_radius, hub_height], center=true);                                                                                                                                                                      
+     cube([spoke_thickness, (outer_radius-tube_radius)*2, hub_height], center=true);                                                                                                                                                                      
  }                                                                                                                                                                                                                                
 
-// Render the toroid
+// hub assembly
 difference() {
-
     color("red"){
         intersection(){
             cylinder(h = hub_height, r = outer_radius-tube_radius, center=true);

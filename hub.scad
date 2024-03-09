@@ -16,10 +16,14 @@ num_spokes      =     6;   // The number of spokes in the wheel
 axle_height     =  31.5;
 axle_diam       =  29.7;
 bearings        = false;
-side_render     =   "i";   // or "o" 
+side_render     =   "i";   // or "o". inner outer yada yada
 
+plate_lyr_thkns = layer_height*base_lyr_count;
 hub_thickness   = extrude_width*wall_count;
 spoke_thickness = extrude_width*wall_count;
+
+washer_diam     =    10;
+thread_diam     =   5.5; // plus .5 mm slop
 
 // Toroid formula
 module toroid(outer_radius, tube_radius) {
@@ -31,8 +35,22 @@ module toroid(outer_radius, tube_radius) {
 module spoke() { 
     cube([spoke_thickness, (outer_radius-tube_radius)*2, axle_height], center=true);
 }
-
-module hub( isHalf = true ){
+// Module to create a single cylinder
+module cylinder_spoke(cylinder_height = 10, cylinder_diameter = 10, num_cylinders = num_spokes) {
+    cylinder(h = cylinder_height, d = cylinder_diameter, $fn = 50);
+}
+module cylinder_array(side = side_render) {
+    // Generate cylinders around a central point
+    for (i = [0 : num_spokes - 1]) {
+        rotate([0, 0, i * 360 / num_spokes]) {
+            translate([outer_radius-((tube_radius*2)+(hub_thickness*2)), 0, 0]) {
+                cylinder_spoke();
+            }
+        }
+    }
+}
+// Module for base hub structure
+module hub_base( isHalf = true ) {
     if(isHalf == true){
         difference() {
             // hub assembly
@@ -101,4 +119,20 @@ module hub( isHalf = true ){
     }
 }
 
-hub(false);
+module hub_half(side = side_render) {
+    // mirror([0,0,1]) 
+    hub_base();
+    if(side == "i") {
+        cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
+        cylinder_array();
+    }
+    else {  
+        cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
+        cylinder_array();
+   }
+}
+
+// hub_base(false);
+
+hub_half(side_render);
+

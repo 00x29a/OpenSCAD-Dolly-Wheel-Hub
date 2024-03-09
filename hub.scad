@@ -2,11 +2,17 @@
 outer_radius    =   100;   // The overall radius of the toroid
 tube_radius     =  22.5;   // The radius of the tube
 
+// Printer Params
+extrude_width   =   0.7;
+wall_count      =     6;
+
 // Paremeters for hub
 hub_height      =    38;
-hub_thickness   =     4;
-spoke_thickness =     4;
+hub_thickness   = extrude_width*wall_count;
+spoke_thickness = extrude_width*wall_count;
 num_spokes      =     8;   // The number of spokes in the wheel
+axle_height     =  31.5;
+axle_diam       =  29.8;
 bearings        = false;
 side_render     =   "i";   // or "o" 
 

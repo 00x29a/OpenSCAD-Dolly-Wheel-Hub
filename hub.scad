@@ -15,7 +15,7 @@ hub_height      =    38;
 num_spokes      =     6;   // The number of spokes in the wheel
 axle_height     =  31.5;
 axle_diam       =  29.7;
-bearings        = false;
+bearings        = false;   // later
 side_render     =   "i";   // or "o". inner outer yada yada
 
 plate_lyr_thkns = layer_height*base_lyr_count;
@@ -53,7 +53,7 @@ module cylinder_array(diam = thread_diam, height = bolt_case, slop = false) {
     // Generate cylinders around a central point
     for (i = [0 : num_spokes - 1]) {
         rotate([0, 0, i * 360 / num_spokes]) {
-            translate([outer_radius-((tube_radius*2)+(hub_thickness*2)), 0, 0]) {
+            translate([outer_radius-((tube_radius*2)+(hub_thickness*1.7)), 0, 0]) {
                 cylinder_spoke(cylinder_diameter = diam, cylinder_height = height, slip = slop);
             }
         }
@@ -131,11 +131,12 @@ module hub_base( isHalf = true ) {
 
 module hub_half(side = side_render) {
     // mirror([0,0,1]) 
-    hub_base();
     if(side == "i") {
+        hub_base();
         difference() {
             cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
             cylinder(h = axle_height+.1, d = axle_diam, center = true, $fn = 100);
+            cylinder_array(thread_diam, bolt_case, slop =  true);
         }
         difference(){
             cylinder_array(washer_diam, bolt_case, slop =  false);
@@ -143,9 +144,11 @@ module hub_half(side = side_render) {
         }
     }
     else {
+        hub_base();
         difference() {
             cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
             cylinder(h = axle_height+.1, d = axle_diam, center = true, $fn = 100);
+            cylinder_array(thread_diam, bolt_case, slop =  true);
         }
         difference(){
             cylinder_array(washer_diam, bolt_case, slop =  false);

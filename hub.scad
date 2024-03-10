@@ -24,6 +24,7 @@ spoke_thickness = extrude_width*wall_count;
 
 washer_diam     =    10;
 thread_diam     =   5.5; // plus .5 mm slop
+bolt_case       =    10;
 
 // Toroid formula
 module toroid(outer_radius, tube_radius) {
@@ -36,15 +37,24 @@ module spoke() {
     cube([spoke_thickness, (outer_radius-tube_radius)*2, axle_height], center=true);
 }
 // Module to create a single cylinder
-module cylinder_spoke(cylinder_height = 10, cylinder_diameter = 10, num_cylinders = num_spokes) {
-    cylinder(h = cylinder_height, d = cylinder_diameter, $fn = 50);
+module cylinder_spoke(cylinder_height = 10, cylinder_diameter = 10, num_cylinders = num_spokes, slip = false) {
+
+    if(slip == true){
+        cyl_height = cylinder_height+0.1;
+        translate([0,0,-0.05]) 
+        cylinder(h = cyl_height, d = cylinder_diameter, $fn = 50);
+    }
+    if(slip == false){
+        cyl_height = cylinder_height;
+        cylinder(h = cyl_height, d = cylinder_diameter, $fn = 50);
+    }
 }
-module cylinder_array(side = side_render) {
+module cylinder_array(diam = thread_diam, height = bolt_case, slop = false) {
     // Generate cylinders around a central point
     for (i = [0 : num_spokes - 1]) {
         rotate([0, 0, i * 360 / num_spokes]) {
             translate([outer_radius-((tube_radius*2)+(hub_thickness*2)), 0, 0]) {
-                cylinder_spoke();
+                cylinder_spoke(cylinder_diameter = diam, cylinder_height = height, slip = slop);
             }
         }
     }
@@ -123,13 +133,25 @@ module hub_half(side = side_render) {
     // mirror([0,0,1]) 
     hub_base();
     if(side == "i") {
-        cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
-        cylinder_array();
+        difference() {
+            cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
+            cylinder(h = axle_height+.1, d = axle_diam, center = true, $fn = 100);
+        }
+        difference(){
+            cylinder_array(washer_diam, bolt_case, slop =  false);
+            cylinder_array(thread_diam, bolt_case, slop =  true);
+        }
     }
-    else {  
-        cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
-        cylinder_array();
-   }
+    else {
+        difference() {
+            cylinder(h = plate_lyr_thkns, r = outer_radius-tube_radius*2, $fn = 100);
+            cylinder(h = axle_height+.1, d = axle_diam, center = true, $fn = 100);
+        }
+        difference(){
+            cylinder_array(washer_diam, bolt_case, slop =  false);
+            cylinder_array(thread_diam, bolt_case, slop = true);
+        }
+    }
 }
 
 // hub_base(false);
